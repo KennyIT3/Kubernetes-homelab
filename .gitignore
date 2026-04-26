@@ -1,0 +1,10 @@
+*.retry
+*.log
+.venv/
+.venv*/
+__pycache__/
+.vault_pass
+*.vault
+*.key
+id_rsa*
+inventory/private*

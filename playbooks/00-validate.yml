@@ -1,0 +1,31 @@
+---
+- name: Validate RHEL lab nodes
+  hosts: working_ansible
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Show OS and Python details
+      debug:
+        msg:
+          - "Host: {{ inventory_hostname }}"
+          - "OS: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+          - "Python: {{ ansible_facts['python']['executable'] }}"
+    
+    - name: Check uptime
+      command: uptime
+      changed_when: false
+
+    - name: Check root filesystem
+      command: df -h /
+      changed_when: false
+
+    - name: Check failed systemd services
+      command: systemctl --failed --no-pager
+      register: failed_services
+      changed_when: false
+      failed_when: false
+
+    - name: Show failed services
+      debug:
+        var: failed_services.stdout_lines
