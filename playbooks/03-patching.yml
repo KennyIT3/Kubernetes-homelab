@@ -1,0 +1,65 @@
+---
+- name: Patch RHEL nodes safely
+  hosts: working_ansible
+  become: true
+  gather_facts: true
+  serial: 1
+
+  pre_tasks:
+    - name: Show patch target
+      ansible.builtin.debug:
+        msg:
+          - "Host: {{ inventory_hostname }}"
+          - "OS: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+
+    - name: Check uptime before patching
+      ansible.builtin.command: uptime
+      register: uptime_before
+      changed_when: false
+
+    - name: Check root filesystem before patching
+      ansible.builtin.command: df -h /
+      register: disk_before
+      changed_when: false
+
+    - name: Display pre-checks
+      ansible.builtin.debug:
+        msg:
+          - "{{ uptime_before.stdout }}"
+          - "{{ disk_before.stdout }}"
+
+  tasks:
+    - name: Update all packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+
+    - name: Install dnf-utils for needs-restarting
+      ansible.builtin.dnf:
+        name: dnf-utils
+        state: present
+
+    - name: Check if reboot is required
+      ansible.builtin.command: needs-restarting -r
+      register: reboot_required
+      changed_when: false
+      failed_when: false
+
+    - name: Reboot if required
+      ansible.builtin.reboot:
+        reboot_timeout: 600
+      when: reboot_required.rc == 1
+
+  post_tasks:
+    - name: Confirm host is reachable after patching
+      ansible.builtin.ping:
+
+    - name: Check failed services
+      ansible.builtin.command: systemctl --failed --no-pager
+      register: failed_services
+      changed_when: false
+      failed_when: false
+
+    - name: Display failed services
+      ansible.builtin.debug:
+        var: failed_services.stdout_lines

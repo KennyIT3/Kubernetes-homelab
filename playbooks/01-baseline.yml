@@ -1,0 +1,45 @@
+---
+- name: Apply baseline configuration to RHEL nodes
+  hosts: working_ansible
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Install baseline packages
+      ansible.builtin.package:
+        name:
+          - vim
+          - git
+          - curl
+          - wget
+          - lsof
+          - bash-completion
+          - bind-utils
+          - net-tools
+          - qemu-guest-agent
+        state: present
+
+    - name: Enable and start qemu guest agent
+      ansible.builtin.service:
+        name: qemu-guest-agent
+        state: started
+        enabled: true
+
+    - name: Install chrony
+      ansible.builtin.package:
+        name: chrony
+        state: present
+
+    - name: Enable and start chronyd
+      ansible.builtin.service:
+        name: chronyd
+        state: started
+        enabled: true
+
+    - name: Create admin tools directory
+      ansible.builtin.file:
+        path: /opt/admin-tools
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
