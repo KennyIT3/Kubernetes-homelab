@@ -8,3 +8,7 @@ __pycache__/
 *.key
 id_rsa*
 inventory/private*
+
+# Real inventory with lab/private IPs
+inventory/hosts.ini
+inventory/*.private.ini
