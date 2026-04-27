@@ -1,0 +1,55 @@
+---
+- name: Configure firewalld service rules
+  hosts: working_ansible
+  become: true
+  gather_facts: true
+
+  vars:
+    allowed_services:
+      - ssh
+    allowed_ports:
+      - "8080/tcp"
+
+  tasks:
+    - name: Install firewalld
+      ansible.builtin.dnf:
+        name: firewalld
+        state: present
+
+    - name: Enable and start firewalld
+      ansible.builtin.service:
+        name: firewalld
+        state: started
+        enabled: true
+
+    - name: Allow required services permanently
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        permanent: true
+        immediate: true
+        state: enabled
+      loop: "{{ allowed_services }}"
+
+    - name: Allow required ports permanently
+      ansible.posix.firewalld:
+        port: "{{ item }}"
+        permanent: true
+        immediate: true
+        state: enabled
+      loop: "{{ allowed_ports }}"
+
+    - name: Show active firewalld zone
+      ansible.builtin.command: firewall-cmd --get-active-zones
+      register: active_zones
+      changed_when: false
+
+    - name: Show firewall rules
+      ansible.builtin.command: firewall-cmd --list-all
+      register: firewall_rules
+      changed_when: false
+
+    - name: Display firewall state
+      ansible.builtin.debug:
+        msg:
+          - "{{ active_zones.stdout_lines }}"
+          - "{{ firewall_rules.stdout_lines }}"

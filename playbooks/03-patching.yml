@@ -1,5 +1,5 @@
 ---
-- name: Patch RHEL nodes safely
+- name: Patch RHEL nodes safely with pre-checks and post-checks
   hosts: working_ansible
   become: true
   gather_facts: true
@@ -11,6 +11,7 @@
         msg:
           - "Host: {{ inventory_hostname }}"
           - "OS: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+          - "Kernel: {{ ansible_facts['kernel'] }}"
 
     - name: Check uptime before patching
       ansible.builtin.command: uptime
@@ -22,22 +23,30 @@
       register: disk_before
       changed_when: false
 
+    - name: Check failed services before patching
+      ansible.builtin.command: systemctl --failed --no-pager
+      register: failed_before
+      changed_when: false
+      failed_when: false
+
     - name: Display pre-checks
       ansible.builtin.debug:
         msg:
           - "{{ uptime_before.stdout }}"
           - "{{ disk_before.stdout }}"
+          - "{{ failed_before.stdout_lines }}"
 
   tasks:
+    - name: Ensure dnf-utils is installed for needs-restarting
+      ansible.builtin.dnf:
+        name: dnf-utils
+        state: present
+
     - name: Update all packages
       ansible.builtin.dnf:
         name: "*"
         state: latest
-
-    - name: Install dnf-utils for needs-restarting
-      ansible.builtin.dnf:
-        name: dnf-utils
-        state: present
+        update_cache: true
 
     - name: Check if reboot is required
       ansible.builtin.command: needs-restarting -r
@@ -45,21 +54,39 @@
       changed_when: false
       failed_when: false
 
-    - name: Reboot if required
+    - name: Show reboot requirement result
+      ansible.builtin.debug:
+        msg: "needs-restarting rc={{ reboot_required.rc }} stdout={{ reboot_required.stdout | default('') }}"
+
+    - name: Reboot host if required
       ansible.builtin.reboot:
         reboot_timeout: 600
+        test_command: whoami
       when: reboot_required.rc == 1
 
   post_tasks:
     - name: Confirm host is reachable after patching
       ansible.builtin.ping:
 
-    - name: Check failed services
+    - name: Check uptime after patching
+      ansible.builtin.command: uptime
+      register: uptime_after
+      changed_when: false
+
+    - name: Check kernel after patching
+      ansible.builtin.command: uname -r
+      register: kernel_after
+      changed_when: false
+
+    - name: Check failed services after patching
       ansible.builtin.command: systemctl --failed --no-pager
-      register: failed_services
+      register: failed_after
       changed_when: false
       failed_when: false
 
-    - name: Display failed services
+    - name: Display post-checks
       ansible.builtin.debug:
-        var: failed_services.stdout_lines
+        msg:
+          - "{{ uptime_after.stdout }}"
+          - "Kernel after patching: {{ kernel_after.stdout }}"
+          - "{{ failed_after.stdout_lines }}"
