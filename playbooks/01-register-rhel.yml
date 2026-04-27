@@ -1,0 +1,87 @@
+---
+- name: Register RHEL systems and enable BaseOS/AppStream repos
+  hosts: working_ansible
+  become: true
+  gather_facts: false
+
+  vars_prompt:
+    - name: rhsm_username
+      prompt: "Red Hat username"
+      private: false
+
+    - name: rhsm_password
+      prompt: "Red Hat password"
+      private: true
+
+  tasks:
+    - name: Detect RHEL major version
+      ansible.builtin.raw: rpm -E %rhel
+      register: rhel_major
+      changed_when: false
+
+    - name: Detect architecture
+      ansible.builtin.raw: uname -m
+      register: rhel_arch
+      changed_when: false
+
+    - name: Show detected OS info
+      ansible.builtin.debug:
+        msg:
+          - "Host: {{ inventory_hostname }}"
+          - "RHEL major: {{ rhel_major.stdout | trim }}"
+          - "Architecture: {{ rhel_arch.stdout | trim }}"
+
+    - name: Check current Red Hat subscription status
+      ansible.builtin.raw: subscription-manager status
+      register: rhsm_status
+      changed_when: false
+      failed_when: false
+
+    - name: Register system with Red Hat if not currently registered
+      ansible.builtin.raw: >
+        subscription-manager register
+        --username='{{ rhsm_username }}'
+        --password='{{ rhsm_password }}'
+        --auto-attach
+      when: rhsm_status.rc != 0
+      no_log: true
+
+    - name: Refresh subscription data
+      ansible.builtin.raw: subscription-manager refresh
+      changed_when: false
+      failed_when: false
+
+    - name: Enable RHEL 8 BaseOS and AppStream repos
+      ansible.builtin.raw: >
+        subscription-manager repos
+        --enable=rhel-8-for-x86_64-baseos-rpms
+        --enable=rhel-8-for-x86_64-appstream-rpms
+      when:
+        - rhel_major.stdout | trim == "8"
+        - rhel_arch.stdout | trim == "x86_64"
+
+    - name: Enable RHEL 9 BaseOS and AppStream repos
+      ansible.builtin.raw: >
+        subscription-manager repos
+        --enable=rhel-9-for-x86_64-baseos-rpms
+        --enable=rhel-9-for-x86_64-appstream-rpms
+      when:
+        - rhel_major.stdout | trim == "9"
+        - rhel_arch.stdout | trim == "x86_64"
+
+    - name: Clean DNF metadata
+      ansible.builtin.raw: dnf clean all
+      changed_when: true
+
+    - name: Rebuild DNF cache
+      ansible.builtin.raw: dnf makecache
+      changed_when: false
+
+    - name: Show enabled repositories
+      ansible.builtin.raw: dnf repolist
+      register: dnf_repolist
+      changed_when: false
+
+    - name: Display enabled repositories
+      ansible.builtin.debug:
+        var: dnf_repolist.stdout_lines
