@@ -53,3 +53,16 @@ lsl() {
     qm listsnapshot "$vmid"
   done
 }
+
+labips() {
+  echo "===== VM 200 ansible-ctrl ====="
+  qm agent 200 network-get-interfaces 2>/dev/null | grep 192 || echo "[WARN] No 192.x IP found or guest agent not running"
+
+  echo
+  echo "===== VM 201 rhel9-lab ====="
+  qm agent 201 network-get-interfaces 2>/dev/null | grep 192 || echo "[WARN] No 192.x IP found or guest agent not running"
+
+  echo
+  echo "===== VM 202 rhel8-lab ====="
+  qm agent 202 network-get-interfaces 2>/dev/null | grep 192 || echo "[WARN] No 192.x IP found or guest agent not running"
+}
