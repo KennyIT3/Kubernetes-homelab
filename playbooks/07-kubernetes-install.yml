@@ -1,0 +1,113 @@
+---
+- name: Install containerd and Kubernetes tooling on RHEL nodes
+  hosts: working_ansible
+  become: true
+  gather_facts: true
+
+  vars:
+    kubernetes_version_repo: "v1.34"
+    kubernetes_repo_baseurl: "https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version_repo }}/rpm/"
+    kubernetes_repo_gpgkey: "https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version_repo }}/rpm/repodata/repomd.xml.key"
+
+  tasks:
+    - name: Install required base packages
+      ansible.builtin.dnf:
+        name:
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+          - curl
+          - tar
+          - iproute-tc
+          - conntrack-tools
+          - socat
+          - ethtool
+        state: present
+
+    - name: Add Docker CE repo for containerd
+      ansible.builtin.command: dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+      args:
+        creates: /etc/yum.repos.d/docker-ce.repo
+
+    - name: Install containerd
+      ansible.builtin.dnf:
+        name: containerd.io
+        state: present
+
+    - name: Ensure containerd config directory exists
+      ansible.builtin.file:
+        path: /etc/containerd
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Generate default containerd config
+      ansible.builtin.shell: containerd config default > /etc/containerd/config.toml
+      args:
+        creates: /etc/containerd/config.toml
+
+    - name: Configure containerd to use systemd cgroups
+      ansible.builtin.replace:
+        path: /etc/containerd/config.toml
+        regexp: 'SystemdCgroup = false'
+        replace: 'SystemdCgroup = true'
+      notify: Restart containerd
+
+    - name: Enable and start containerd
+      ansible.builtin.service:
+        name: containerd
+        state: started
+        enabled: true
+
+    - name: Create Kubernetes yum repo
+      ansible.builtin.copy:
+        dest: /etc/yum.repos.d/kubernetes.repo
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          [kubernetes]
+          name=Kubernetes
+          baseurl={{ kubernetes_repo_baseurl }}
+          enabled=1
+          gpgcheck=1
+          gpgkey={{ kubernetes_repo_gpgkey }}
+          exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
+
+    - name: Install kubelet, kubeadm, and kubectl
+      ansible.builtin.dnf:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        disable_excludes: kubernetes
+
+    - name: Enable kubelet
+      ansible.builtin.service:
+        name: kubelet
+        enabled: true
+
+    - name: Validate containerd version
+      ansible.builtin.command: containerd --version
+      register: containerd_version
+      changed_when: false
+
+    - name: Validate kubeadm version
+      ansible.builtin.command: kubeadm version -o short
+      register: kubeadm_version
+      changed_when: false
+
+    - name: Show installed versions
+      ansible.builtin.debug:
+        msg:
+          - "{{ inventory_hostname }}"
+          - "{{ containerd_version.stdout }}"
+          - "{{ kubeadm_version.stdout }}"
+
+  handlers:
+    - name: Restart containerd
+      ansible.builtin.service:
+        name: containerd
+        state: restarted
