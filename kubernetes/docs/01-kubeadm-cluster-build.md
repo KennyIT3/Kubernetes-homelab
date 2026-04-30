@@ -19,3 +19,13 @@
 6. Deploy nginx test workload
 7. Expose nginx using NodePort
 8. Validate the cluster
+
+## Nginx NodePort Validation
+
+Created a test nginx deployment:
+
+```bash
+kubectl create deployment nginx-test --image=nginx --replicas=2
+kubectl expose deployment nginx-test --type=NodePort --port=80
+kubectl get pods -o wide
+kubectl get svc nginx-test
