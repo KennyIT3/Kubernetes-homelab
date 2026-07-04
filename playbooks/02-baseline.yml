@@ -1,6 +1,6 @@
 ---
 - name: Apply baseline configuration to RHEL nodes
-  hosts: working_ansible
+  hosts: all
   become: true
   gather_facts: true
 
@@ -14,16 +14,16 @@
           - wget
           - lsof
           - bash-completion
-          - bind-utils
+            # - bind-utils
           - net-tools
           - qemu-guest-agent
         state: present
 
-    - name: Enable and start qemu guest agent
-      ansible.builtin.service:
-        name: qemu-guest-agent
-        state: started
-        enabled: true
+     - name: Enable and start qemu guest agent
+       ansible.builtin.service:
+       name: qemu-guest-agent
+       state: started
+       enabled: true
 
     - name: Install chrony
       ansible.builtin.package:
