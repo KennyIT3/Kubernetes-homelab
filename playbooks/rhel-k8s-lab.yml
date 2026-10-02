@@ -1,0 +1,12 @@
+---
+- name: Prepare RHEL nodes for Kubernetes job-prep lab
+  hosts: rhel8,rhel9
+  become: true
+  gather_facts: true
+
+  roles:
+    - baseline
+    - users_sudo
+    - firewall
+    - podman
+    - k8s_prereqs
