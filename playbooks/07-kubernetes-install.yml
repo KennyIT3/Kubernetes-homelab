@@ -1,4 +1,4 @@
----
+ ---
 - name: Install containerd and Kubernetes tooling on RHEL nodes
   hosts: working_ansible
   become: true
