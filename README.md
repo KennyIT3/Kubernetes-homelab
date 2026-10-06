@@ -62,8 +62,6 @@ Proxmox
 ├── k8s-wk-02
 └── ai01
 
-So shoudl I also add this to the readme
-
 ## Skills Demonstrated
 
 ### Implemented: Linux / RHEL Administration
@@ -132,7 +130,7 @@ So shoudl I also add this to the readme
 ---
 ## Directory Structure
 
-```text
+```
 rhel-ansible-lab/
 ├── ansible.cfg
 ├── inventory/
