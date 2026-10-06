@@ -66,13 +66,13 @@ So shoudl I also add this to the readme
 
 ## Skills Demonstrated
 
-### Linux / RHEL Administration
+### Implemented: Linux / RHEL Administration
 
 - RHEL 8 and RHEL 9 system administration
 - SSH key-based automation access
 - Static Ansible inventory design
 - RHEL subscription and repository enablement
-- Baseline configuration
+- Baseline system configuration
 - User, group, and sudoers management
 - Safe sudoers validation with `visudo`
 - firewalld automation
@@ -82,7 +82,7 @@ So shoudl I also add this to the readme
 - Kernel module and sysctl configuration
 - Podman, Buildah, and Skopeo installation/testing
 
-### Ansible Automation
+### Implemented: Ansible Automation
 
 - Ansible roles and playbooks
 - Group variables and host variables
@@ -94,30 +94,45 @@ So shoudl I also add this to the readme
 - Pre-checks and post-checks
 - Conditional reboot handling
 - Multi-OS inventory organization
+- Separate RHEL and Ubuntu host groups
 
-### Kubernetes / Platform Engineering
+### Implemented: Infrastructure Provisioning
+
+- Proxmox VM provisioning
+- Terraform with the Proxmox provider
+- Ubuntu cloud image based VM creation
+- Separate Terraform state per project
+- VM lifecycle management
+- Git-based infrastructure workflow
+- Git branch workflow for platform changes
+
+### In Progress: Kubernetes / Platform Engineering
 
 - Kubernetes node preparation
 - K3s cluster design
 - Control plane and worker node separation
+- Ubuntu K3s node provisioning
 - Kubernetes prerequisite automation
 - Kernel module and bridge networking setup
-- Future FluxCD GitOps workflows
-- Future ingress, monitoring, storage, backup, and restore labs
+- Ansible-driven node preparation
 
-### Infrastructure Provisioning
+### Planned: Kubernetes Platform Features
 
-- Proxmox VM provisioning
-- Terraform with the Proxmox provider
-- Cloud image based VM creation
-- Separate Terraform state per project
-- VM lifecycle management
-- Git-based infrastructure workflow
+- K3s control plane installation
+- K3s worker node joins
+- kubeconfig setup on `ansible-ctrl`
+- Test application deployment
+- Ingress configuration
+- FluxCD GitOps workflows
+- Monitoring with Prometheus and Grafana
+- Persistent storage labs
+- Backup and restore workflows
+- RBAC and NetworkPolicy security labs
 
 ---
-
 ## Directory Structure
-```
+
+```text
 rhel-ansible-lab/
 ├── ansible.cfg
 ├── inventory/
