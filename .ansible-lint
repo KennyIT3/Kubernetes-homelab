@@ -1,0 +1,16 @@
+---
+profile: basic
+
+exclude_paths:
+  - .venv-ansible216/
+  - .venv/
+  - terraform/
+  - .git/
+
+skip_list:
+  # Allow shell usage where required for installer scripts or complex shell logic.
+  - command-instead-of-shell
+
+warn_list:
+  # Warn, but do not fail, for line length while this lab is still being built.
+  - yaml[line-length]
