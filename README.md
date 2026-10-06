@@ -61,3 +61,114 @@ Proxmox
 ├── k8s-wk-01
 ├── k8s-wk-02
 └── ai01
+
+So shoudl I also add this to the readme
+
+## Skills Demonstrated
+
+### Linux / RHEL Administration
+
+- RHEL 8 and RHEL 9 system administration
+- SSH key-based automation access
+- Static Ansible inventory design
+- RHEL subscription and repository enablement
+- Baseline configuration
+- User, group, and sudoers management
+- Safe sudoers validation with `visudo`
+- firewalld automation
+- Package management with `dnf`
+- SELinux-aware troubleshooting
+- systemd service management
+- Kernel module and sysctl configuration
+- Podman, Buildah, and Skopeo installation/testing
+
+### Ansible Automation
+
+- Ansible roles and playbooks
+- Group variables and host variables
+- Idempotent task design
+- Conditional logic with `when`
+- Facts and `set_fact`
+- Jinja2 templating
+- Serial patching workflows
+- Pre-checks and post-checks
+- Conditional reboot handling
+- Multi-OS inventory organization
+
+### Kubernetes / Platform Engineering
+
+- Kubernetes node preparation
+- K3s cluster design
+- Control plane and worker node separation
+- Kubernetes prerequisite automation
+- Kernel module and bridge networking setup
+- Future FluxCD GitOps workflows
+- Future ingress, monitoring, storage, backup, and restore labs
+
+### Infrastructure Provisioning
+
+- Proxmox VM provisioning
+- Terraform with the Proxmox provider
+- Cloud image based VM creation
+- Separate Terraform state per project
+- VM lifecycle management
+- Git-based infrastructure workflow
+
+---
+
+## Directory Structure
+```
+rhel-ansible-lab/
+├── ansible.cfg
+├── inventory/
+│   ├── hosts.example.ini
+│   └── hosts.ini
+├── group_vars/
+│   ├── all.yml
+│   ├── rhel.yml
+│   ├── rhel8_nodes.yml
+│   └── rhel9_nodes.yml
+├── host_vars/
+│   ├── rhel8.yml
+│   └── rhel9.yml
+├── playbooks/
+│   ├── 00-register-rhel.yml
+│   ├── 00-validate.yml
+│   ├── 01-baseline.yml
+│   ├── 02-users-sudo.yml
+│   ├── 03-patching.yml
+│   ├── 04-firewall.yml
+│   ├── 05-podman.yml
+│   ├── 06-k8s-prereqs.yml
+│   ├── rhel-k8s-lab.yml
+│   ├── ubuntu-k3s-prereqs.yml
+│   ├── baseline.yml
+│   ├── users-sudo.yml
+│   ├── firewall.yml
+│   ├── containers.yml
+│   ├── k8s-prereqs.yml
+│   └── site.yml
+├── roles/
+│   ├── baseline/
+│   ├── users_sudo/
+│   ├── firewall/
+│   ├── podman/
+│   └── k8s_prereqs/
+├── terraform/
+│   └── proxmox/
+│       └── k3s/
+│           ├── main.tf
+│           ├── variables.tf
+│           ├── outputs.tf
+│           ├── providers.tf
+│           └── .gitignore
+├── kubernetes/
+│   ├── docs/
+│   │   └── 01-kubeadm-cluster-build.md
+│   ├── manifests/
+│   └── scripts/
+├── create-vms.sh
+├── lab-functions.sh
+├── setup_ansible.sh
+└── README.md
+```
