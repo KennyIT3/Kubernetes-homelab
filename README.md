@@ -130,7 +130,7 @@ Proxmox
 ---
 ## Directory Structure
 
-```
+```text
 rhel-ansible-lab/
 ├── ansible.cfg
 ├── inventory/
