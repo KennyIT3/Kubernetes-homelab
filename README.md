@@ -1,77 +1,63 @@
-# RHEL Ansible Automation Lab
+# RHEL + Kubernetes Homelab Platform
 
 ## Overview
 
-This project is a Proxmox-based RHEL automation lab built to practice Linux systems administration, Ansible automation, patching workflows, container tooling, and Kubernetes node preparation.
+This project is a Proxmox-based Linux and Kubernetes homelab built to practice real-world systems administration, Ansible automation, Kubernetes platform engineering, infrastructure provisioning, and production-style troubleshooting.
 
-The lab uses an Ubuntu Ansible control node to manage RHEL 8 and RHEL 9 servers. The goal is to simulate common enterprise Linux automation tasks such as baseline configuration, user and sudo management, patching, firewalld configuration, Podman/Buildah/Skopeo installation, and Kubernetes prerequisite setup.
+The lab has two main tracks:
+
+1. **RHEL Enterprise Linux Automation Track**
+   - RHEL 8 and RHEL 9 managed with Ansible
+   - Baseline system configuration
+   - User and sudo management
+   - firewalld automation
+   - Podman, Buildah, and Skopeo tooling
+   - Kubernetes prerequisite setup
+   - Enterprise Linux troubleshooting practice
+
+2. **Ubuntu K3s Kubernetes Platform Track**
+   - Ubuntu 24.04 VMs provisioned on Proxmox with Terraform
+   - K3s Kubernetes cluster
+   - Ansible-driven node preparation
+   - Future GitOps with FluxCD
+   - Future ingress, monitoring, storage, backup, and application deployment labs
+
+The goal is to build a job-ready homelab that reflects both enterprise Linux operations and modern Kubernetes platform engineering.
+
+---
 
 ## Lab Architecture
 
 | System | OS | Role |
 |---|---|---|
-| ansible-ctrl | Ubuntu Server 24.04 | Ansible control node |
-| rhel8 | Red Hat Enterprise Linux 8 | Managed node / container host / Kubernetes worker prep |
-| rhel9 | Red Hat Enterprise Linux 9 | Managed node / Kubernetes control-plane prep |
+| ansible-ctrl | Ubuntu Server 24.04 | Ansible, Terraform, kubectl, Git control node |
+| rhel8 | Red Hat Enterprise Linux 8 | RHEL managed node / Kubernetes prep lab |
+| rhel9 | Red Hat Enterprise Linux 9 | RHEL managed node / Kubernetes prep lab |
+| k8s-cp-01 | Ubuntu Server 24.04 | K3s control plane |
+| k8s-wk-01 | Ubuntu Server 24.04 | K3s worker node |
+| k8s-wk-02 | Ubuntu Server 24.04 | K3s worker node |
+| ai01 | Ubuntu Server 24.04 | Separate AI/automation project VM |
 
-The virtual machines are hosted on Proxmox and use local LVM-thin storage for VM disks. VM lifecycle tasks such as starting, stopping, snapshotting, and checking VM IPs are managed from the Proxmox host. OS configuration and automation are handled by Ansible from the control node.
+The virtual machines are hosted on Proxmox and use local LVM-thin storage for VM disks.
 
-## Skills Demonstrated
+Terraform provisions the Ubuntu Kubernetes VMs through the Proxmox API. Ansible configures Linux hosts and prepares them for Kubernetes. Kubernetes workloads will later be managed through GitOps.
 
-- Proxmox VM provisioning and lifecycle management
-- Linux system administration on RHEL 8 and RHEL 9
-- SSH key-based automation access
-- Static Ansible inventory design
-- Ansible roles, playbooks, group variables, and host variables
-- Python interpreter handling for RHEL systems
-- RHEL subscription and repository enablement
-- Idempotent baseline configuration
-- User, group, and sudoers management
-- Safe sudoers validation with `visudo`
-- Serial patching with pre-checks and post-checks
-- Conditional reboot handling
-- firewalld automation
-- Podman, Buildah, and Skopeo installation/testing
-- Kubernetes prerequisite automation
-- Jinja2 templating
-- `set_fact` and `when` conditionals
-- Git-based infrastructure automation workflow
+---
 
-## Directory Structure
+## Operating Model
 
 ```text
-rhel-ansible-lab/
-├── ansible.cfg
-├── inventory/
-│   ├── hosts.example.ini
-│   └── hosts.ini
-├── group_vars/
-│   ├── all.yml
-│   ├── rhel.yml
-│   ├── rhel8_nodes.yml
-│   └── rhel9_nodes.yml
-├── host_vars/
-│   ├── rhel8.yml
-│   └── rhel9.yml
-├── playbooks/
-│   ├── 00-register-rhel.yml
-│   ├── 00-validate.yml
-│   ├── 01-baseline.yml
-│   ├── 02-users-sudo.yml
-│   ├── 03-patching.yml
-│   ├── 04-firewall.yml
-│   ├── 05-podman.yml
-│   ├── 06-k8s-prereqs.yml
-│   ├── baseline.yml
-│   ├── users-sudo.yml
-│   ├── firewall.yml
-│   ├── containers.yml
-│   ├── k8s-prereqs.yml
-│   └── site.yml
-├── roles/
-│   ├── baseline/
-│   ├── users_sudo/
-│   ├── firewall/
-│   ├── podman/
-│   └── k8s_prereqs/
-└── README.md
+ansible-ctrl
+├── Terraform/OpenTofu  -> provisions Proxmox VMs
+├── Ansible             -> configures Linux and Kubernetes prerequisites
+├── kubectl             -> manages Kubernetes
+├── Git/GitHub          -> tracks infrastructure automation
+└── FluxCD              -> future GitOps controller
+
+Proxmox
+├── rhel8
+├── rhel9
+├── k8s-cp-01
+├── k8s-wk-01
+├── k8s-wk-02
+└── ai01
