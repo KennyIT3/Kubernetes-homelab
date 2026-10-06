@@ -1,0 +1,7 @@
+output "ai01_vm_id" {
+  value = proxmox_virtual_environment_vm.ai01.vm_id
+}
+
+output "ai01_name" {
+  value = proxmox_virtual_environment_vm.ai01.name
+}
