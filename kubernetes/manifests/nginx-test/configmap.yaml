@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-test-index
+  namespace: lab-test
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Kubernetes Homelab</title>
+    </head>
+    <body>
+      <h1>Kubernetes Homelab Platform</h1>
+      <p>This page is served by nginx running in Kubernetes.</p>
+      <p>The index.html file is mounted from a Kubernetes ConfigMap.</p>
+      <p>Traffic path: DNS -> Traefik Ingress -> Service -> Pod.</p>
+    </body>
+    </html>
